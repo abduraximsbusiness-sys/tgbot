@@ -1,12 +1,3 @@
-/**
- * Personal Task Tracker Bot
- * Simple, clean, just for you
- */
-require('dotenv').config();
-
-
-
-// REST OF YOUR CODE CONTINUES BELOW
 
 // ... etc
 const { Telegraf, Markup } = require('telegraf');
