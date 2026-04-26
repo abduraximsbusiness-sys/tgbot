@@ -319,11 +319,9 @@ bot.action(/task_(\d+)/, (ctx) => {
 });
 
 // LAUNCH
-// LAUNCH
 initDB();
 bot.launch();
 console.log('🚀 Bot running. Send /start to test.');
-
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
