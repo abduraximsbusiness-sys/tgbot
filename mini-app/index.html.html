@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Tracker - Life Book</title>
+  <script async src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-main: #0a0a14;
+      --bg-card: #15152a;
+      --bg-elevated: #1e1e3a;
+      --border: #2a2a4a;
+      --accent: #16c784;
+      --accent-glow: rgba(22, 199, 132, 0.15);
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0b8;
+      --text-tertiary: #6c6c85;
+    }
+
+    body {
+      background: var(--bg-main);
+      background-image: 
+        radial-gradient(at 20% 0%, rgba(22, 199, 132, 0.08) 0px, transparent 50%),
+        radial-gradient(at 80% 100%, rgba(127, 119, 221, 0.08) 0px, transparent 50%);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      padding: 16px;
+      min-height: 100vh;
+      letter-spacing: -0.01em;
+    }
+
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #fff 0%, #a0a0b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .week-date {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-glow);
+      color: var(--accent);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    /* Top Stats */
+    .stats-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .stat-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 14px 12px;
+      border-radius: 14px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+
+    /* Main Progress Section */
+    .progress-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .progress-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .bar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .bar-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      min-width: 32px;
+      font-weight: 600;
+    }
+
+    .bar {
+      flex: 1;
+      height: 6px;
+      background: var(--bg-elevated);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent) 0%, #22d39a 100%);
+      transition: width 0.5s;
+      border-radius: 3px;
+    }
+
+    .progress-ring-container {
+      position: relative;
+      width: 110px;
+      height: 110px;
+    }
+
+    .progress-ring-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .ring-percent {
+      font-family: 'Fraunces', serif;
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .ring-label {
+      font-size: 9px;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    /* Section title */
+    .section-title {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-subtitle {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-bottom: 14px;
+    }
+
+    /* Days Grid */
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .day-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .day-card.active {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    .day-card.future {
+      opacity: 0.7;
+    }
+
+    .day-card.future::after {
+      content: '🔮';
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      font-size: 10px;
+    }
+
+    .day-card:active {
+      transform: scale(0.97);
+    }
+
+    .day-name {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .day-date {
+      font-size: 9px;
+      color: var(--text-tertiary);
+      margin-bottom: 8px;
+    }
+
+    .day-ring-container {
+      position: relative;
+      width: 70px;
+      height: 70px;
+      margin: 0 auto;
+    }
+
+    .day-ring-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .day-percent {
+      font-family: 'Fraunces', serif;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .day-tasks-count {
+      font-size: 8px;
+      color: var(--text-secondary);
+    }
+
+    /* Selected Day Details */
+    .selected-day-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .selected-day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .selected-day-title {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .selected-day-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .add-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      color: var(--bg-main);
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .add-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* Task list */
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: var(--bg-elevated);
+      border-radius: 10px;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .task-item:hover {
+      border-color: var(--border);
+    }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .task-text.completed {
+      text-decoration: line-through;
+      color: var(--text-tertiary);
+    }
+
+    .task-delete {
+      background: none;
+      border: none;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 16px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .task-delete:hover {
+      color: #ff6b6b;
+      background: rgba(255, 107, 107, 0.1);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--text-tertiary);
+      font-size: 13px;
+      font-style: italic;
+    }
+
+    /* Task input modal */
+    .task-input-row {
+      display: none;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--bg-elevated);
+      border-radius: 10px;
+      border: 1px solid var(--accent);
+    }
+
+    .task-input-row.active {
+      display: flex;
+    }
+
+    .input {
+      flex: 1;
+      padding: 10px 12px;
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .save-btn {
+      padding: 10px 14px;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: var(--bg-main);
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .cancel-btn {
+      padding: 10px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    /* Journal/Life Book Section */
+    .journal-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .journal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .journal-icon {
+      font-size: 20px;
+    }
+
+    .journal-title {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      flex: 1;
+    }
+
+    .journal-status {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .journal-status.show {
+      opacity: 1;
+    }
+
+    .journal-prompt {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .journal-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-family: 'Fraunces', serif;
+      font-size: 14px;
+      line-height: 1.7;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+
+    .journal-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .journal-textarea::placeholder {
+      color: var(--text-tertiary);
+      font-style: italic;
+    }
+
+    .journal-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    /* Summary Section */
+    .summary-section {
+      background: linear-gradient(135deg, var(--bg-card) 0%, rgba(22, 199, 132, 0.05) 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .summary-title {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .summary-stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .summary-stat:last-child {
+      border-bottom: none;
+    }
+
+    .stat-name {
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .stat-val {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 13px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .insight {
+      background: var(--accent-glow);
+      padding: 12px 14px;
+      border-radius: 10px;
+      border-left: 3px solid var(--accent);
+      margin-top: 14px;
+      font-size: 13px;
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    /* Color classes */
+    svg circle.ring-bg { stroke: var(--bg-elevated); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>Life Book</h1>
+      <p>Track your days, write your story</p>
+      <div class="week-date">
+        <span>📅</span>
+        <span id="weekDate">Week of 04.01.2026</span>
+      </div>
+    </div>
+
+    <!-- Top Stats -->
+    <div class="stats-top">
+      <div class="stat-box">
+        <div class="stat-label">This Week</div>
+        <div class="stat-value" id="weekProgressStat">74%</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Tasks</div>
+        <div class="stat-value" id="tasksDoneStat">32/43</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Lifetime</div>
+        <div class="stat-value" id="lifetimeStat">156d</div>
+      </div>
+    </div>
+
+    <!-- Main Progress Section -->
+    <div class="progress-section">
+      <div class="progress-bars" id="progressBars"></div>
+
+      <div class="progress-ring-container">
+        <svg viewBox="0 0 120 120" style="width: 100%; height: 100%; transform: rotate(-90deg);">
+          <circle cx="60" cy="60" r="50" class="ring-bg" stroke-width="8" fill="none"/>
+          <circle cx="60" cy="60" r="50" class="ring-fill" id="mainRing" stroke="#16c784" stroke-width="8" fill="none" stroke-dasharray="314" stroke-dashoffset="79" stroke-linecap="round"/>
+        </svg>
+        <div class="progress-ring-text">
+          <div class="ring-percent" id="mainPercent">74%</div>
+          <div class="ring-label">Done</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Days Grid -->
+    <div class="section-title">Your Week</div>
+    <div class="section-subtitle">Tap any day to view or plan</div>
+    <div class="days-grid" id="daysGrid"></div>
+
+    <!-- Selected Day Details -->
+    <div class="selected-day-section" id="selectedDaySection">
+      <div class="selected-day-header">
+        <div>
+          <div class="selected-day-title" id="selectedDayTitle">Today</div>
+          <div class="selected-day-subtitle" id="selectedDaySubtitle">Monday • 04.01.2026</div>
+        </div>
+        <button class="add-btn" onclick="showTaskInput()">+</button>
+      </div>
+
+      <div class="task-list" id="taskList"></div>
+
+      <div class="task-input-row" id="taskInputRow">
+        <input type="text" id="taskInput" class="input" placeholder="What needs to be done?">
+        <button class="save-btn" onclick="addTask()">Add</button>
+        <button class="cancel-btn" onclick="hideTaskInput()">✕</button>
+      </div>
+    </div>
+
+    <!-- Daily Journal / Life Book -->
+    <div class="journal-section">
+      <div class="journal-header">
+        <span class="journal-icon">📖</span>
+        <div class="journal-title">Life Book Entry</div>
+        <span class="journal-status" id="journalStatus">✓ Saved</span>
+      </div>
+      <div class="journal-prompt" id="journalPrompt">
+        How was your day? What did you learn? What are you grateful for?
+      </div>
+      <textarea 
+        class="journal-textarea" 
+        id="journalText" 
+        placeholder="Write about your day..."
+        oninput="saveJournal()"
+      ></textarea>
+      <div class="journal-meta">
+        <span id="journalWordCount">0 words</span>
+        <span id="journalLastSaved">Not saved yet</span>
+      </div>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="summary-section">
+      <div class="summary-title">Today's Summary</div>
+      <div class="summary-stat">
+        <span class="stat-name">Tasks Completed</span>
+        <span class="stat-val" id="summaryTasks">8/10</span>
+      </div>
+      <div class="summary-stat">
+        <span class="stat-name">Completion Rate</span>
+        <span class="stat-val" id="summaryRate">80%</span>
+      </div>
+      <div class="summary-stat">
+        <span class="stat-name">Current Streak</span>
+        <span class="stat-val" id="summaryStreak">🔥 5 days</span>
+      </div>
+      <div class="summary-stat">
+        <span class="stat-name">Journal Entries</span>
+        <span class="stat-val" id="summaryEntries">12 days</span>
+      </div>
+      <div class="insight" id="insightText">
+        "Every day you write is a day you remember forever."
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const colors = ['#7f77dd', '#378add', '#1d9e75', '#639922', '#ba7517', '#d85a30', '#ff6b6b'];
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayFullNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    let allData = {
+      tasks: {},      // { "2026-01-04": [{id, text, completed}] }
+      journals: {},   // { "2026-01-04": "today was..." }
+      created: null   // first day used
+    };
+
+    let selectedDate = new Date().toISOString().split('T')[0];
+    let saveTimeout = null;
+
+    // Load from localStorage
+    function loadData() {
+      const saved = localStorage.getItem('lifebookData');
+      if (saved) {
+        allData = JSON.parse(saved);
+      }
+      if (!allData.created) {
+        allData.created = new Date().toISOString().split('T')[0];
+      }
+      renderUI();
+    }
+
+    function saveData() {
+      localStorage.setItem('lifebookData', JSON.stringify(allData));
+    }
+
+    function getWeekDays() {
+      const days = [];
+      const today = new Date();
+      const firstDay = new Date(today);
+      firstDay.setDate(today.getDate() - today.getDay());
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(firstDay);
+        d.setDate(firstDay.getDate() + i);
+        const dateStr = d.toISOString().split('T')[0];
+        const isFuture = d > today && d.toDateString() !== today.toDateString();
+        const isToday = d.toDateString() === today.toDateString();
+        days.push({
+          name: dayNames[i],
+          fullName: dayFullNames[i],
+          date: dateStr,
+          display: `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()}`,
+          isFuture,
+          isToday
+        });
+      }
+      return days;
+    }
+
+    function renderProgressBars() {
+      const days = getWeekDays();
+      const container = document.getElementById('progressBars');
+      
+      container.innerHTML = days.map(day => {
+        const tasks = allData.tasks[day.date] || [];
+        const completed = tasks.filter(t => t.completed).length;
+        const percent = tasks.length > 0 ? Math.round((completed / tasks.length) * 100) : 0;
+        
+        return `
+          <div class="bar-item">
+            <span class="bar-label">${day.name}</span>
+            <div class="bar">
+              <div class="bar-fill" style="width: ${percent}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderDaysGrid() {
+      const grid = document.getElementById('daysGrid');
+      const days = getWeekDays();
+      
+      grid.innerHTML = days.map((day, idx) => {
+        const tasks = allData.tasks[day.date] || [];
+        const completed = tasks.filter(t => t.completed).length;
+        const total = tasks.length;
+        const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+        const offset = 220 * (1 - percent / 100);
+        const isActive = day.date === selectedDate;
+        const futureClass = day.isFuture ? 'future' : '';
+        const activeClass = isActive ? 'active' : '';
+
+        return `
+          <div class="day-card ${activeClass} ${futureClass}" onclick="selectDay('${day.date}')">
+            <div class="day-name">${day.name}</div>
+            <div class="day-date">${day.display.substring(0, 5)}</div>
+            <div class="day-ring-container">
+              <svg viewBox="0 0 80 80" style="width: 100%; height: 100%; transform: rotate(-90deg);">
+                <circle cx="40" cy="40" r="35" stroke="#2a2a4a" stroke-width="5" fill="none"/>
+                <circle cx="40" cy="40" r="35" stroke="${colors[idx]}" stroke-width="5" fill="none" 
+                        stroke-dasharray="220" stroke-dashoffset="${offset}" stroke-linecap="round" style="transition: stroke-dashoffset 0.5s;"/>
+              </svg>
+              <div class="day-ring-text">
+                <div class="day-percent">${percent}%</div>
+                <div class="day-tasks-count">${completed}/${total || 0}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectDay(date) {
+      selectedDate = date;
+      hideTaskInput();
+      renderUI();
+    }
+
+    function renderSelectedDay() {
+      const days = getWeekDays();
+      const day = days.find(d => d.date === selectedDate);
+      if (!day) return;
+
+      // Title
+      let titleText = day.fullName;
+      if (day.isToday) titleText = 'Today';
+      else if (day.isFuture) titleText = day.fullName + ' (Upcoming)';
+      
+      document.getElementById('selectedDayTitle').textContent = titleText;
+      document.getElementById('selectedDaySubtitle').textContent = `${day.fullName} • ${day.display}`;
+
+      // Tasks
+      const tasks = allData.tasks[selectedDate] || [];
+      const taskList = document.getElementById('taskList');
+      
+      if (tasks.length === 0) {
+        taskList.innerHTML = '<div class="empty-state">No tasks yet. Tap + to add one.</div>';
+      } else {
+        taskList.innerHTML = tasks.map(task => `
+          <div class="task-item">
+            <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} 
+                   onchange="toggleTask(${task.id})">
+            <span class="task-text ${task.completed ? 'completed' : ''}">${escapeHtml(task.text)}</span>
+            <button class="task-delete" onclick="deleteTask(${task.id})" title="Delete">×</button>
+          </div>
+        `).join('');
+      }
+
+      // Journal
+      const journal = allData.journals[selectedDate] || '';
+      const textarea = document.getElementById('journalText');
+      textarea.value = journal;
+      updateWordCount();
+
+      // Update prompt based on day
+      const prompts = {
+        today: "How is your day going? What's on your mind?",
+        past: "Looking back, how was that day? What did you learn?",
+        future: "What are you looking forward to? Plan your day."
+      };
+      const promptType = day.isToday ? 'today' : (day.isFuture ? 'future' : 'past');
+      document.getElementById('journalPrompt').textContent = prompts[promptType];
+
+      // Update saved indicator
+      if (journal) {
+        document.getElementById('journalLastSaved').textContent = 'Saved';
+      } else {
+        document.getElementById('journalLastSaved').textContent = 'Not saved yet';
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showTaskInput() {
+      document.getElementById('taskInputRow').classList.add('active');
+      document.getElementById('taskInput').focus();
+    }
+
+    function hideTaskInput() {
+      document.getElementById('taskInputRow').classList.remove('active');
+      document.getElementById('taskInput').value = '';
+    }
+
+    function addTask() {
+      const input = document.getElementById('taskInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      if (!allData.tasks[selectedDate]) {
+        allData.tasks[selectedDate] = [];
+      }
+
+      allData.tasks[selectedDate].push({
+        id: Date.now(),
+        text: text,
+        completed: false
+      });
+
+      input.value = '';
+      saveData();
+      renderUI();
+      
+      // Re-show input for quick adding multiple tasks
+      setTimeout(() => {
+        document.getElementById('taskInput').focus();
+      }, 50);
+    }
+
+    function toggleTask(taskId) {
+      const tasks = allData.tasks[selectedDate];
+      if (!tasks) return;
+      const task = tasks.find(t => t.id === taskId);
+      if (task) {
+        task.completed = !task.completed;
+        saveData();
+        renderUI();
+      }
+    }
+
+    function deleteTask(taskId) {
+      if (!allData.tasks[selectedDate]) return;
+      allData.tasks[selectedDate] = allData.tasks[selectedDate].filter(t => t.id !== taskId);
+      saveData();
+      renderUI();
+    }
+
+    function saveJournal() {
+      const text = document.getElementById('journalText').value;
+      
+      if (text.trim()) {
+        allData.journals[selectedDate] = text;
+      } else {
+        delete allData.journals[selectedDate];
+      }
+
+      // Debounced save
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        saveData();
+        showSaveStatus();
+      }, 500);
+
+      updateWordCount();
+    }
+
+    function updateWordCount() {
+      const text = document.getElementById('journalText').value;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      document.getElementById('journalWordCount').textContent = `${words} words`;
+    }
+
+    function showSaveStatus() {
+      const status = document.getElementById('journalStatus');
+      status.classList.add('show');
+      document.getElementById('journalLastSaved').textContent = 'Saved just now';
+      setTimeout(() => {
+        status.classList.remove('show');
+      }, 2000);
+    }
+
+    function calculateStats() {
+      const days = getWeekDays();
+      let totalCompleted = 0, totalTasks = 0;
+
+      days.forEach(day => {
+        if (day.isFuture) return;
+        const tasks = allData.tasks[day.date] || [];
+        totalCompleted += tasks.filter(t => t.completed).length;
+        totalTasks += tasks.length;
+      });
+
+      const weekPercent = totalTasks > 0 ? Math.round((totalCompleted / totalTasks) * 100) : 0;
+
+      // Update main ring
+      const offset = 314 * (1 - weekPercent / 100);
+      document.getElementById('mainRing').style.strokeDashoffset = offset;
+      document.getElementById('mainPercent').textContent = weekPercent + '%';
+
+      document.getElementById('weekProgressStat').textContent = weekPercent + '%';
+      document.getElementById('tasksDoneStat').textContent = totalCompleted + '/' + totalTasks;
+
+      // Lifetime stats
+      const totalDays = Object.keys(allData.tasks).length;
+      document.getElementById('lifetimeStat').textContent = totalDays + 'd';
+
+      // Today's summary (or selected day)
+      const today = new Date().toISOString().split('T')[0];
+      const todayTasks = allData.tasks[today] || [];
+      const todayCompleted = todayTasks.filter(t => t.completed).length;
+      const todayRate = todayTasks.length > 0 ? Math.round((todayCompleted / todayTasks.length) * 100) : 0;
+
+      document.getElementById('summaryTasks').textContent = todayCompleted + '/' + todayTasks.length;
+      document.getElementById('summaryRate').textContent = todayRate + '%';
+
+      // Streak calculation
+      const streak = calculateStreak();
+      document.getElementById('summaryStreak').textContent = `🔥 ${streak} day${streak !== 1 ? 's' : ''}`;
+
+      // Journal entries count
+      const entries = Object.keys(allData.journals).length;
+      document.getElementById('summaryEntries').textContent = `${entries} day${entries !== 1 ? 's' : ''}`;
+
+      // Insight
+      const insights = [
+        '"Every day you write is a day you remember forever."',
+        '"Small steps every day lead to big changes."',
+        '"You\'re building something beautiful, one day at a time."',
+        '"The best time to plant a tree was 20 years ago. The second best is today."',
+        '"Progress, not perfection."'
+      ];
+      const idx = (totalCompleted + entries) % insights.length;
+      document.getElementById('insightText').textContent = insights[idx];
+    }
+
+    function calculateStreak() {
+      let streak = 0;
+      let currentDate = new Date();
+      
+      while (true) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        const tasks = allData.tasks[dateStr] || [];
+        const completed = tasks.filter(t => t.completed).length;
+        
+        if (tasks.length > 0 && completed === tasks.length) {
+          streak++;
+          currentDate.setDate(currentDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+      
+      return streak;
+    }
+
+    function renderUI() {
+      const days = getWeekDays();
+      const weekStart = days[0].display;
+      document.getElementById('weekDate').textContent = 'Week of ' + weekStart;
+
+      renderProgressBars();
+      renderDaysGrid();
+      renderSelectedDay();
+      calculateStats();
+    }
+
+    // Telegram Web App
+    if (window.Telegram && window.Telegram.WebApp) {
+      Telegram.WebApp.ready();
+      Telegram.WebApp.expand();
+    }
+
+    // Enter key for task input
+    document.getElementById('taskInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') addTask();
+      if (e.key === 'Escape') hideTaskInput();
+    });
+
+    // Initialize
+    loadData();
+  </script>
+</body>
+</html>
