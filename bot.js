@@ -4,21 +4,10 @@
  */
 require('dotenv').config();
 
-// ADD THIS (Web server for Railway)
-const express = require('express');
-const app = express();
 
-app.get('/', (req, res) => {
-  res.send('✅ Bot is running!');
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Web server running on port ${PORT}`);
-});
 
 // REST OF YOUR CODE CONTINUES BELOW
-const { Telegraf, Markup } = require('telegraf');
+
 // ... etc
 const { Telegraf, Markup } = require('telegraf');
 const sqlite3 = require('sqlite3').verbose();
