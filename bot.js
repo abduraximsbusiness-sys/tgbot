@@ -324,17 +324,6 @@ initDB();
 bot.launch();
 console.log('🚀 Bot running. Send /start to test.');
 
-// ============ RAILWAY HEALTH CHECK ============
-const http = require('http');
-const server = http.createServer((req, res) => {
-  res.writeHead(200);
-  res.end('Bot is running');
-});
-
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Health check server on port ${PORT}`);
-});
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
